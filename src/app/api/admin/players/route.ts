@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
   const [player] = await db
     .insert(users)
-    .values({ email: parsed.data.email })
+    .values({ email: parsed.data.email, name: parsed.data.name ?? null })
     .returning();
 
   return NextResponse.json(player, { status: 201 });

@@ -26,6 +26,7 @@ export function PlayerManager({
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -40,11 +41,12 @@ export function PlayerManager({
     const res = await fetch("/api/admin/players", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, name: name.trim() || undefined }),
     });
 
     if (res.ok) {
       setEmail("");
+      setName("");
       router.refresh();
     } else {
       const data = await res.json();
@@ -64,22 +66,30 @@ export function PlayerManager({
     <div className="space-y-4">
       <Card>
         <CardContent className="pt-4">
-          <form onSubmit={addPlayer} className="flex gap-2">
+          <form onSubmit={addPlayer} className="space-y-2">
             <Input
-              type="email"
-              placeholder="player@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="flex-1"
+              type="text"
+              placeholder="Name (e.g. Sriram)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-            <Button type="submit" disabled={adding} size="sm">
-              {adding ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="player@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+              <Button type="submit" disabled={adding} size="sm">
+                {adding ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
           </form>
           {error && (
             <p className="mt-2 text-sm text-destructive">{error}</p>
