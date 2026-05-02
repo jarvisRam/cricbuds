@@ -36,6 +36,9 @@ export default async function LeaderboardPage() {
       wins: sql<number>`sum(case when ${results.rank} = 1 then 1 else 0 end)`.as(
         "wins"
       ),
+      avgAccuracy: sql<number | null>`round(avg(${results.accuracy}))`.as(
+        "avg_accuracy"
+      ),
     })
     .from(results)
     .innerJoin(users, eq(results.userId, users.id))
@@ -93,8 +96,12 @@ export default async function LeaderboardPage() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold">{entry.totalPoints}</p>
-                  <p className="text-xs text-muted-foreground">pts</p>
+                  <p className="text-lg font-bold">{entry.totalPoints} pts</p>
+                  <p className="text-xs text-muted-foreground">
+                    {entry.avgAccuracy != null
+                      ? `${entry.avgAccuracy}% accuracy`
+                      : "—"}
+                  </p>
                 </div>
               </CardContent>
             </Card>

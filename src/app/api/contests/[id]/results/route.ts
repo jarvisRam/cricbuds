@@ -28,6 +28,7 @@ export async function GET(
     .select({
       userId: results.userId,
       totalDiff: results.totalDiff,
+      accuracy: results.accuracy,
       rank: results.rank,
       points: results.points,
       userName: users.name,

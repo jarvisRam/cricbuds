@@ -84,6 +84,7 @@ export const results = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     totalDiff: integer("total_diff").notNull(),
+    accuracy: integer("accuracy"),
     rank: integer("rank").notNull(),
     points: integer("points").notNull().default(0),
   },

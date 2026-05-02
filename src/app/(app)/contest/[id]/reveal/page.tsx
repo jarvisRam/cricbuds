@@ -26,6 +26,7 @@ export default async function RevealPage({
     .select({
       userId: results.userId,
       totalDiff: results.totalDiff,
+      accuracy: results.accuracy,
       rank: results.rank,
       points: results.points,
       userName: users.name,
@@ -49,6 +50,7 @@ export default async function RevealPage({
           userName: r.userName ?? "Unknown",
           userImage: r.userImage,
           totalDiff: r.totalDiff,
+          accuracy: r.accuracy,
           rank: r.rank,
           points: r.points,
         }))}

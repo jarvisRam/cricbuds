@@ -13,6 +13,7 @@ interface ResultItem {
   userName: string;
   userImage: string | null;
   totalDiff: number;
+  accuracy: number | null;
   rank: number;
   points: number;
 }
@@ -100,7 +101,9 @@ export function RevealSequence({ results }: { results: ResultItem[] }) {
                   <p className="text-sm font-medium">{r.userName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-mono">{r.totalDiff} diff</p>
+                  <p className="text-sm font-mono font-bold">
+                    {r.accuracy != null ? `${r.accuracy}%` : "—"}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {r.points} pts
                   </p>
@@ -157,7 +160,9 @@ export function RevealSequence({ results }: { results: ResultItem[] }) {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-mono">{r.totalDiff} diff</p>
+                  <p className={`font-mono font-bold ${r.rank === 1 ? "text-base text-yellow-500" : "text-sm"}`}>
+                    {r.accuracy != null ? `${r.accuracy}%` : "—"}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {r.points} pts
                   </p>
@@ -191,7 +196,9 @@ export function RevealSequence({ results }: { results: ResultItem[] }) {
             🎉 {results[0]?.userName} wins!
           </p>
           <p className="text-sm text-muted-foreground">
-            With only {results[0]?.totalDiff} total difference
+            {results[0]?.accuracy != null
+              ? `${results[0].accuracy}% prediction accuracy`
+              : "Most accurate predictor"}
           </p>
         </motion.div>
       )}

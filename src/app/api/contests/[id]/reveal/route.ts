@@ -53,6 +53,7 @@ export async function POST(
         contestId: id,
         userId: r.userId,
         totalDiff: r.totalDiff,
+        accuracy: r.accuracy,
         rank: r.rank,
         points: r.points,
       }))

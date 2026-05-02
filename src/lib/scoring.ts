@@ -22,6 +22,7 @@ interface ActualStat {
 export interface RankedResult {
   userId: string;
   totalDiff: number;
+  accuracy: number;
   rank: number;
   points: number;
 }
@@ -39,24 +40,41 @@ export function calculateResults(
     grouped.set(pred.predictorId, list);
   }
 
-  const scores: { userId: string; totalDiff: number }[] = [];
+  const scores: { userId: string; totalDiff: number; accuracy: number }[] = [];
 
   for (const [predictorId, preds] of grouped) {
     let totalDiff = 0;
+    let maxPossible = 0;
     let validPredictions = 0;
 
     for (const pred of preds) {
       const actual = actualsByUser.get(pred.targetId);
       if (!actual) continue;
       validPredictions++;
-      totalDiff += Math.abs(pred.predRuns - actual.runs);
-      totalDiff += Math.abs(pred.predWickets - actual.wickets);
-      totalDiff += Math.abs(pred.predCatches - actual.catches);
-      totalDiff += Math.abs(pred.predMissed - actual.missed);
+
+      const bothRain = pred.predRainedOff && actual.rainedOff;
+
+      if (bothRain) {
+        // Perfect rain prediction — treat as 4 perfectly predicted stats
+        maxPossible += 4;
+      } else {
+        totalDiff += Math.abs(pred.predRuns - actual.runs);
+        totalDiff += Math.abs(pred.predWickets - actual.wickets);
+        totalDiff += Math.abs(pred.predCatches - actual.catches);
+        totalDiff += Math.abs(pred.predMissed - actual.missed);
+        maxPossible += Math.max(pred.predRuns, actual.runs);
+        maxPossible += Math.max(pred.predWickets, actual.wickets);
+        maxPossible += Math.max(pred.predCatches, actual.catches);
+        maxPossible += Math.max(pred.predMissed, actual.missed);
+      }
     }
 
     if (validPredictions > 0) {
-      scores.push({ userId: predictorId, totalDiff });
+      const accuracy =
+        maxPossible > 0
+          ? Math.max(0, Math.round(100 * (1 - totalDiff / maxPossible)))
+          : 100; // All predictions were correct rain calls
+      scores.push({ userId: predictorId, totalDiff, accuracy });
     }
   }
 
@@ -71,6 +89,7 @@ export function calculateResults(
     ranked.push({
       userId: scores[i].userId,
       totalDiff: scores[i].totalDiff,
+      accuracy: scores[i].accuracy,
       rank: currentRank,
       points: getPointsForRank(currentRank),
     });
