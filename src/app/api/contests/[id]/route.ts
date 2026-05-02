@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { contests, predictions, actualStats } from "@/lib/db/schema";
+import { contests, predictions, actualStats, results } from "@/lib/db/schema";
 import { updateContestStatusSchema } from "@/lib/validations";
 import { eq, and, count } from "drizzle-orm";
 
@@ -102,7 +102,6 @@ export async function DELETE(
   const { id } = await params;
   const db = getDb();
 
-  // Only open contests can be deleted
   const [contest] = await db
     .select()
     .from(contests)
@@ -113,16 +112,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (contest.status !== "open") {
-    return NextResponse.json(
-      { error: "Only open contests can be deleted" },
-      { status: 400 }
-    );
-  }
-
-  // Delete child records first, then the contest
+  // Delete all child records first (predictions, stats, results), then the contest
   await db.delete(predictions).where(eq(predictions.contestId, id));
   await db.delete(actualStats).where(eq(actualStats.contestId, id));
+  await db.delete(results).where(eq(results.contestId, id));
   await db.delete(contests).where(eq(contests.id, id));
 
   return NextResponse.json({ success: true });

@@ -30,7 +30,11 @@ export function ContestAdminControls({
   }
 
   async function deleteContest() {
-    if (!confirm("Delete this contest? This will also remove all predictions. This cannot be undone.")) return;
+    const msg =
+      currentStatus === "open"
+        ? "Delete this contest? This will also remove all predictions. This cannot be undone."
+        : "Delete this contest? This will permanently remove all predictions, stats, and results. This cannot be undone.";
+    if (!confirm(msg)) return;
     setDeleting(true);
     const res = await fetch(`/api/contests/${contestId}`, { method: "DELETE" });
     if (res.ok) {
@@ -56,8 +60,6 @@ export function ContestAdminControls({
       setLoading(false);
     }
   }
-
-  if (currentStatus === "revealed") return null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -85,17 +87,15 @@ export function ContestAdminControls({
         </Button>
       )}
 
-      {currentStatus === "open" && (
-        <Button
-          onClick={deleteContest}
-          disabled={deleting}
-          variant="ghost"
-          className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="mr-2 h-4 w-4" />
-          {deleting ? "Deleting..." : "Delete Contest"}
-        </Button>
-      )}
+      <Button
+        onClick={deleteContest}
+        disabled={deleting}
+        variant="ghost"
+        className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+      >
+        <Trash2 className="mr-2 h-4 w-4" />
+        {deleting ? "Deleting..." : "Delete Contest"}
+      </Button>
     </div>
   );
 }
