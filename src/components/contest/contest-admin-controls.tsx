@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles } from "lucide-react";
+import { Lock, Sparkles, Trash2 } from "lucide-react";
 
 export function ContestAdminControls({
   contestId,
@@ -16,6 +16,7 @@ export function ContestAdminControls({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function lockContest() {
     setLoading(true);
@@ -26,6 +27,20 @@ export function ContestAdminControls({
     });
     router.refresh();
     setLoading(false);
+  }
+
+  async function deleteContest() {
+    if (!confirm("Delete this contest? This will also remove all predictions. This cannot be undone.")) return;
+    setDeleting(true);
+    const res = await fetch(`/api/contests/${contestId}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/admin");
+      router.refresh();
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to delete contest");
+      setDeleting(false);
+    }
   }
 
   async function revealContest() {
@@ -45,7 +60,7 @@ export function ContestAdminControls({
   if (currentStatus === "revealed") return null;
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col gap-2">
       {currentStatus === "open" && (
         <Button
           onClick={lockContest}
@@ -67,6 +82,18 @@ export function ContestAdminControls({
         >
           <Sparkles className="mr-2 h-4 w-4" />
           {loading ? "Revealing..." : "Reveal Winner"}
+        </Button>
+      )}
+
+      {currentStatus === "open" && (
+        <Button
+          onClick={deleteContest}
+          disabled={deleting}
+          variant="ghost"
+          className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          {deleting ? "Deleting..." : "Delete Contest"}
         </Button>
       )}
     </div>

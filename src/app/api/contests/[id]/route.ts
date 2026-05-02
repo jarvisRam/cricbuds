@@ -5,6 +5,7 @@ import { contests, predictions, actualStats } from "@/lib/db/schema";
 import { updateContestStatusSchema } from "@/lib/validations";
 import { eq, and, count } from "drizzle-orm";
 
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -87,4 +88,42 @@ export async function PATCH(
     .returning();
 
   return NextResponse.json(updated);
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user || session.user.role !== "admin") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const db = getDb();
+
+  // Only open contests can be deleted
+  const [contest] = await db
+    .select()
+    .from(contests)
+    .where(eq(contests.id, id))
+    .limit(1);
+
+  if (!contest) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (contest.status !== "open") {
+    return NextResponse.json(
+      { error: "Only open contests can be deleted" },
+      { status: 400 }
+    );
+  }
+
+  // Delete child records first, then the contest
+  await db.delete(predictions).where(eq(predictions.contestId, id));
+  await db.delete(actualStats).where(eq(actualStats.contestId, id));
+  await db.delete(contests).where(eq(contests.id, id));
+
+  return NextResponse.json({ success: true });
 }
