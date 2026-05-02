@@ -100,10 +100,12 @@ export async function POST(
         contestId: id,
         predictorId: session.user.id,
         targetId: p.targetId,
-        predRuns: p.predRuns,
-        predWickets: p.predWickets,
-        predCatches: p.predCatches,
-        predMissed: p.predMissed,
+        predRainedOff: p.predRainedOff ?? false,
+        // Force all stats to 0 when rain is predicted
+        predRuns: p.predRainedOff ? 0 : p.predRuns,
+        predWickets: p.predRainedOff ? 0 : p.predWickets,
+        predCatches: p.predRainedOff ? 0 : p.predCatches,
+        predMissed: p.predRainedOff ? 0 : p.predMissed,
       }))
     );
   }

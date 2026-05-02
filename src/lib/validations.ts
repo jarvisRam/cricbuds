@@ -17,6 +17,7 @@ export const predictionSchema = z.object({
       predWickets: z.number().int().min(0),
       predCatches: z.number().int().min(0),
       predMissed: z.number().int().min(0),
+      predRainedOff: z.boolean().default(false),
     })
   ),
 });
@@ -26,6 +27,7 @@ export const statsSchema = z.object({
   wickets: z.number().int().min(0),
   catches: z.number().int().min(0),
   missed: z.number().int().min(0),
+  rainedOff: z.boolean().default(false),
 });
 
 export const addPlayerSchema = z.object({

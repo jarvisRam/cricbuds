@@ -39,7 +39,7 @@ export default async function PredictPage({
 
   const existingMap: Record<
     string,
-    { predRuns: number; predWickets: number; predCatches: number; predMissed: number }
+    { predRuns: number; predWickets: number; predCatches: number; predMissed: number; predRainedOff: boolean }
   > = {};
   for (const p of myPredictions) {
     existingMap[p.targetId] = {
@@ -47,6 +47,7 @@ export default async function PredictPage({
       predWickets: p.predWickets,
       predCatches: p.predCatches,
       predMissed: p.predMissed,
+      predRainedOff: p.predRainedOff,
     };
   }
 

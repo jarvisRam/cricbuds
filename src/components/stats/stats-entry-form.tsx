@@ -12,6 +12,7 @@ interface StatsValues {
   wickets: number;
   catches: number;
   missed: number;
+  rainedOff: boolean;
 }
 
 const statFields = [
@@ -32,11 +33,12 @@ export function StatsEntryForm({
 }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [values, setValues] = useState<StatsValues>(
+  const [rainedOff, setRainedOff] = useState(existing?.rainedOff ?? false);
+  const [values, setValues] = useState<Omit<StatsValues, "rainedOff">>(
     existing ?? { runs: 0, wickets: 0, catches: 0, missed: 0 }
   );
 
-  function updateValue(field: keyof StatsValues, value: string) {
+  function updateValue(field: keyof Omit<StatsValues, "rainedOff">, value: string) {
     const num = parseInt(value) || 0;
     setValues((prev) => ({ ...prev, [field]: Math.max(0, num) }));
   }
@@ -46,7 +48,7 @@ export function StatsEntryForm({
     await fetch(`/api/contests/${contestId}/stats`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ ...values, rainedOff }),
     });
     router.push(`/contest/${contestId}`);
     router.refresh();
@@ -62,21 +64,45 @@ export function StatsEntryForm({
           </div>
         )}
 
-        {statFields.map((stat) => (
-          <div key={stat.key} className="space-y-1">
-            <label className="text-sm font-medium">
-              {stat.emoji} {stat.label}
-            </label>
-            <Input
-              type="number"
-              min={0}
-              value={values[stat.key]}
-              onChange={(e) => updateValue(stat.key, e.target.value)}
-              disabled={disabled}
-              className="text-lg h-12"
-            />
+        {/* Rained off toggle */}
+        {!disabled && (
+          <button
+            type="button"
+            onClick={() => setRainedOff((v) => !v)}
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg border transition-colors text-sm font-medium ${
+              rainedOff
+                ? "border-blue-500/50 bg-blue-500/15 text-blue-400"
+                : "border-muted text-muted-foreground hover:border-blue-500/30 hover:text-blue-400"
+            }`}
+          >
+            🌧️ {rainedOff ? "Game Rained Off (tap to undo)" : "Game Rained Off?"}
+          </button>
+        )}
+
+        {rainedOff ? (
+          <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 text-center">
+            <p className="text-blue-400 font-medium">🌧️ Rained off</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Anyone who predicted rain for you gets full marks
+            </p>
           </div>
-        ))}
+        ) : (
+          statFields.map((stat) => (
+            <div key={stat.key} className="space-y-1">
+              <label className="text-sm font-medium">
+                {stat.emoji} {stat.label}
+              </label>
+              <Input
+                type="number"
+                min={0}
+                value={values[stat.key]}
+                onChange={(e) => updateValue(stat.key, e.target.value)}
+                disabled={disabled}
+                className="text-lg h-12"
+              />
+            </div>
+          ))
+        )}
 
         {!disabled && (
           <Button

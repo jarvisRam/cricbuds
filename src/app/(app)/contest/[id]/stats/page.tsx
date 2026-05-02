@@ -50,6 +50,7 @@ export default async function StatsPage({
                 wickets: myStats.wickets,
                 catches: myStats.catches,
                 missed: myStats.missed,
+                rainedOff: myStats.rainedOff,
               }
             : null
         }

@@ -82,16 +82,25 @@ export async function POST(
       )
     );
 
+  const statsToSave = {
+    rainedOff: parsed.data.rainedOff ?? false,
+    // Force all stats to 0 when rained off
+    runs: parsed.data.rainedOff ? 0 : parsed.data.runs,
+    wickets: parsed.data.rainedOff ? 0 : parsed.data.wickets,
+    catches: parsed.data.rainedOff ? 0 : parsed.data.catches,
+    missed: parsed.data.rainedOff ? 0 : parsed.data.missed,
+  };
+
   if (existing) {
     await db
       .update(actualStats)
-      .set({ ...parsed.data, submittedAt: new Date() })
+      .set({ ...statsToSave, submittedAt: new Date() })
       .where(eq(actualStats.id, existing.id));
   } else {
     await db.insert(actualStats).values({
       contestId: id,
       userId: session.user.id,
-      ...parsed.data,
+      ...statsToSave,
     });
   }
 

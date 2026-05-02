@@ -7,6 +7,7 @@ interface Prediction {
   predWickets: number;
   predCatches: number;
   predMissed: number;
+  predRainedOff: boolean;
 }
 
 interface ActualStat {
@@ -15,6 +16,7 @@ interface ActualStat {
   wickets: number;
   catches: number;
   missed: number;
+  rainedOff: boolean;
 }
 
 export interface RankedResult {

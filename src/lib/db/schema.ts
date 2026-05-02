@@ -3,6 +3,7 @@ import {
   uuid,
   text,
   integer,
+  boolean,
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
@@ -46,6 +47,7 @@ export const predictions = pgTable(
     predWickets: integer("pred_wickets").notNull().default(0),
     predCatches: integer("pred_catches").notNull().default(0),
     predMissed: integer("pred_missed").notNull().default(0),
+    predRainedOff: boolean("pred_rained_off").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [unique().on(t.contestId, t.predictorId, t.targetId)]
@@ -65,6 +67,7 @@ export const actualStats = pgTable(
     wickets: integer("wickets").notNull().default(0),
     catches: integer("catches").notNull().default(0),
     missed: integer("missed").notNull().default(0),
+    rainedOff: boolean("rained_off").notNull().default(false),
     submittedAt: timestamp("submitted_at").defaultNow().notNull(),
   },
   (t) => [unique().on(t.contestId, t.userId)]
